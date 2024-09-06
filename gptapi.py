@@ -1,10 +1,9 @@
 import openai
-import time
 from dotenv import load_dotenv
 import os
 
 # OpenAI API 키 설정
-load_dotenv(dotenv_path='team/chatbot/env')  # .env 파일을 로드하여 환경 변수를 설정
+load_dotenv(dotenv_path='GitH/env')  # .env 파일을 로드하여 환경 변수를 설정
 openai.api_key = os.getenv('OPENAI_API_KEY')  # 환경 변수에서 OpenAI API 키 가져오기
 
 def generate_adventure(prompt):
