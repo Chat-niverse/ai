@@ -70,10 +70,8 @@ def process_request():
         "imageurl": processed_data.get("imageurl", "http://example.com/images/dragon.jpg")
     }
 
-    # 처리된 데이터를 클라이언트에 직접 응답으로 전송
-    return jsonify({
-        'processed_data': final_data  # 처리된 데이터를 응답에 포함
-    }), 200
+    # 처리된 데이터만 응답으로 전송
+    return jsonify(final_data), 200  # final_data만 전송
 
 def run_ai_server():
     """AI 서버 실행"""
