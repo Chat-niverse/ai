@@ -153,12 +153,3 @@ def parse_story(story_text):
     # 스토리 텍스트를 필요한 형식으로 가공
     return story_text.strip()
 
-# 선택 횟수 파싱
-def parse_count(count_text):
-    # 선택 횟수를 정수로 변환하여 반환
-    return int(count_text.strip())
-
-# 예시 사용
-response_text = get_main_story('중세시대 유럽', '가정적인 농부', '마왕 처치', None, None)
-json_output = parse_gpt_response(response_text)
-print(json_output)

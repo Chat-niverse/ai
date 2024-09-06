@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 import json
-import requests
 from game import get_main_story, parse_gpt_response  # 필요한 함수 임포트
 
 app = Flask(__name__)
@@ -52,28 +51,18 @@ def process_request():
         "life": processed_data.get("life", 3),
         "inventory": processed_data.get("inventory", {}),
         "playlog": processed_data.get("playlog", ""),
-        "count": processed_data.get("count", 0),
         "selectedchoice": selectedchoice,
         "gptsays": processed_data.get("gptsays", ""),
         "choices": processed_data.get("choices", {}),
         "imageurl": processed_data.get("imageurl", "")
     }
 
-    # 백엔드로 결과 전송할 URL
-    backend_url = "http://your-backend-server-url/endpoint"  # 실제 백엔드 서버 URL로 교체
-
-    try:
-        # 백엔드 서버로 결과 전송
-        response = requests.post(backend_url, json=final_data)
-        response.raise_for_status()  # 요청이 성공하지 않으면 예외 발생
-        return jsonify({
-            'status': 'success',
-            'message': 'Game data processed and sent to backend successfully',
-            'backend_response': response.json()  # 백엔드에서 온 응답을 포함
-        }), 200
-
-    except requests.exceptions.RequestException as e:
-        return jsonify({'status': 'failure', 'message': f'Failed to send data to backend server: {e}'}), 500
+    # 처리된 데이터를 클라이언트에 직접 응답으로 전송
+    return jsonify({
+        'status': 'success',
+        'message': 'Game data processed successfully',
+        'processed_data': final_data  # 처리된 데이터를 응답에 포함
+    }), 200
 
 def run_ai_server():
     """AI 서버 실행"""
