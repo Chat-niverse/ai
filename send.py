@@ -6,40 +6,57 @@ app = Flask(__name__)
 
 @app.route('/process', methods=['POST'])
 def process_request():
-    """백엔드 서버로부터 데이터를 받아 처리하고 결과를 다시 전송하는 엔드포인트"""
-    data = request.json
-    user_input = data.get('input')
-    callback_url = data.get('callback_url')  # 결과를 전송할 백엔드 서버의 URL
+    """백엔드로부터 JSON 파일을 받아 처리하고 결과를 다시 백엔드로 전송하는 엔드포인트"""
 
-    # 1. 입력을 받았다는 상태를 먼저 백엔드 서버로 전송
-    status_update = {'status': 'received', 'message': 'Input received by AI server'}
+    # JSON 파일 받기
+    if 'file' not in request.files:
+        return jsonify({'status': 'failure', 'message': 'No file part in the request'}), 400
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({'status': 'failure', 'message': 'No file selected for uploading'}), 400
+
     try:
-        status_response = requests.post(callback_url, json=status_update)
-        status_response.raise_for_status()
-        print("입력 상태 업데이트를 백엔드 서버로 전송했습니다.")
-    except requests.exceptions.RequestException as e:
-        print(f"입력 상태 업데이트 전송 중 오류 발생: {e}")
-        return jsonify({'status': 'failure', 'message': 'Failed to update status'}), 500
+        data = json.load(file)  # JSON 파일을 파싱합니다.
+    except json.JSONDecodeError:
+        print("JSON 디코딩 오류: 파일이 유효한 JSON 형식이 아닙니다.")
+        return jsonify({'status': 'failure', 'message': 'Invalid JSON format in file'}), 400
 
-    story = '테스트 스토리'
-    label = '테스트 라벨'
+    # 백엔드 서버로 결과를 전송할 URL 추출
+    backend_callback_url = data.get('callback_url')  # 결과를 전송할 백엔드 서버의 URL
 
-    # 결과를 JSON 파일로 저장
-    result_data = {
-        'intent': story,
-        'message': label,
-    }
-    with open('result.json', 'w') as json_file:
-        json.dump(result_data, json_file)
+    # 주요 게임 데이터 확인
+    username = data.get('username')
+    worldview = data.get('worldview')
+    charsetting = data.get('charsetting')
+    aim = data.get('aim')
+    status = data.get('status')
+    life = data.get('life')
+    inventory = data.get('inventory')
+    playlog = data.get('playlog')
+    gameending = data.get('gameending')
+    gptsays = data.get('gptsays')
 
-    # 3. 처리된 결과를 백엔드 서버로 전송
+    # 데이터 검증: 필수 데이터 확인
+    required_fields = [username, worldview, charsetting, aim]
+    if any(field is None for field in required_fields):
+        return jsonify({'status': 'failure', 'message': 'Missing required fields'}), 400
+
+    # 후속 요청인 경우, 백엔드로 데이터 전송
+    if not backend_callback_url:
+        return jsonify({'status': 'failure', 'message': 'Backend callback URL is missing'}), 400
+
+    # 동일한 JSON 파일 형식으로 백엔드로 전송
     try:
-        response = requests.post(callback_url, json=result_data)
-        response.raise_for_status()
-        return jsonify({'status': 'success', 'message': 'Result sent to backend server'}), 200
+        backend_response = requests.post(backend_callback_url, json=data)
+        backend_response.raise_for_status()
+        print("데이터를 백엔드 서버로 전송했습니다.")
+        return jsonify({'status': 'success', 'message': 'Data sent to backend server'}), 200
+
     except requests.exceptions.RequestException as e:
-        print(f"결과 전송 중 오류 발생: {e}")
-        return jsonify({'status': 'failure', 'message': 'Failed to send result'}), 500
+        print(f"데이터 전송 중 오류 발생: {e}")
+        return jsonify({'status': 'failure', 'message': 'Failed to send data to backend server'}), 500
 
 def run_ai_server():
     """AI 서버 실행"""
