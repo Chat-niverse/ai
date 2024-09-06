@@ -101,7 +101,6 @@ def parse_gpt_response(response_text):
     inventory = parse_inventory(inventory_match.group(1).strip()) if inventory_match else {}
     story = parse_story(story_match.group(1).strip()) if story_match else ""
     choices = parse_choices(choices_match.group(1).strip()) if choices_match else {}
-    count = parse_count(count_match.group(1).strip()) if count_match else 0
 
     # 예시 JSON 데이터 생성
     json_data = {
