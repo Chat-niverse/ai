@@ -134,7 +134,14 @@ def parse_inventory(inventory_text):
     inventory = {}
     for line in inventory_lines:
         key, value = line.split(':')
-        inventory[key.strip()] = int(value.strip())
+        key = key.strip()
+        value = value.strip()
+        try:
+            # 정수 변환 시도, 변환이 불가능한 경우 0으로 설정
+            inventory[key] = int(value)
+        except ValueError:
+            # '없음' 등의 텍스트가 있으면 0으로 처리하거나, 필요 시 None 처리
+            inventory[key] = 0  # 또는 `continue`로 항목을 무시하도록 설정 가능
     return inventory
 
 # 선택지 파싱
