@@ -30,7 +30,7 @@ def process_request():
 
     # 게임 스토리 진행: 처음 입력이거나 이후 입력에 따라 다르게 처리
     story_response = get_main_story(worldview, charsetting, aim, playlog, selectedchoice)
-    
+    print(story_response)
     # GPT 응답을 JSON 형식으로 변환
     processed_data = parse_output_to_json(story_response)
 

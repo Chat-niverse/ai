@@ -45,12 +45,12 @@ def get_main_story(world, char_traits, aim, playlog, selectchoice, max_tokens=10
     진행 상황:
     - 현재까지의 대화 기록: {playlog} (None일 경우 첫 대화입니다).
     - 사용자의 선택: {selectchoice} (None일 경우 첫 선택입니다).
+    - 첫 대화일 경우 선택횟수는 0이야
 
     중요: 다음 사용자 입력이 필요합니다. 추가 입력이 있을 때까지 다음 출력을 생성하지 마세요.
     스텟의 변화나 아이템의 획득을 선택지에 직접적인 수치로 표시하지는 말아줘
     스텟은 스탯이름:1, 스탯이름:2, 스탯이름:3 이런식으로 출력해줘
     위 내용을 바탕으로 상황을 묘사하고, 선택지를 제공해 주세요.
-
     마지막에 엔딩때는 요약을 [요약] 하고 요약을 출력해줘
     """
     
@@ -81,11 +81,10 @@ def parse_output_to_json(output_text):
                     print(f"Failed to parse status value for {key.strip()}: {value.strip()}")
                     status[key.strip()] = 1  # 변환 실패 시 기본값 설정
 
-    # 인벤토리 추출
     inventory_match = re.search(r'\[인벤토리\]\n아이템 : (.+)', output_text)
     inventory_items = inventory_match.group(1).split(', ') if inventory_match else ['']
-    inventory = {inventory_items}
-
+    inventory = inventory_items
+    
     # 스토리 추출
     playlog_match = re.search(r'\[스토리\]\n(.+?)\n\n', output_text, re.DOTALL)
     playlog = playlog_match.group(1) if playlog_match else ''
