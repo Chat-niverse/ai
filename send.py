@@ -17,10 +17,10 @@ def process_request():
         return jsonify({'status': 'failure', 'message': 'Invalid JSON format in body'}), 400
 
     # 주요 게임 데이터 확인
-    username = data.get('username')
-    worldview = data.get('worldview')
-    charsetting = data.get('charsetting')
-    aim = data.get('aim')
+    username = data.get('username', 'PlayerOne')  # 기본 값 추가
+    worldview = data.get('worldview', 'Fantasy')  # 기본 값 추가
+    charsetting = data.get('charsetting', 'Warrior')  # 기본 값 추가
+    aim = data.get('aim', 'Defeat the Dragon')  # 기본 값 추가
     playlog = data.get('playlog')
     selectedchoice = data.get('selectedchoice')
 
@@ -47,20 +47,31 @@ def process_request():
         "worldview": worldview,
         "charsetting": charsetting,
         "aim": aim,
-        "status": processed_data.get("status", {}),
+        "status": {
+            "strength": processed_data.get("status", {}).get("힘", 1),
+            "perception": processed_data.get("status", {}).get("인지력", 1),
+            "endurance": processed_data.get("status", {}).get("지구력", 1),
+            "charisma": processed_data.get("status", {}).get("카리스마", 1),
+            "intelligence": processed_data.get("status", {}).get("지능", 1),
+            "luck": processed_data.get("status", {}).get("운", 1),
+            "life": processed_data.get("status", {}).get("체력", 3)
+        },
         "life": processed_data.get("life", 3),
         "inventory": processed_data.get("inventory", {}),
         "playlog": processed_data.get("playlog", ""),
-        "selectedchoice": selectedchoice,
+        "selectedchoice": selectedchoice or "first",  # 기본 선택 값
         "gptsays": processed_data.get("gptsays", ""),
-        "choices": processed_data.get("choices", {}),
-        "imageurl": processed_data.get("imageurl", "")
+        "choices": {
+            "first": processed_data.get("choices", {}).get("choice_1", ""),
+            "second": processed_data.get("choices", {}).get("choice_2", ""),
+            "third": processed_data.get("choices", {}).get("choice_3", ""),
+            "fourth": processed_data.get("choices", {}).get("choice_4", "")
+        },
+        "imageurl": processed_data.get("imageurl", "http://example.com/images/dragon.jpg")
     }
 
     # 처리된 데이터를 클라이언트에 직접 응답으로 전송
     return jsonify({
-        'status': 'success',
-        'message': 'Game data processed successfully',
         'processed_data': final_data  # 처리된 데이터를 응답에 포함
     }), 200
 

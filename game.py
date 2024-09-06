@@ -144,20 +144,20 @@ def parse_status(status_text):
     return status
 
 # 인벤토리 파싱
+# 인벤토리 파싱
 def parse_inventory(inventory_text):
     inventory_lines = inventory_text.split('\n')
     inventory = {}
     for line in inventory_lines:
-        key, value = line.split(':')
-        key = key.strip()
-        value = value.strip()
-        try:
-            # 정수 변환 시도, 변환이 불가능한 경우 0으로 설정
-            inventory[key] = int(value)
-        except ValueError:
-            # '없음' 등의 텍스트가 있으면 0으로 처리하거나, 필요 시 None 처리
-            inventory[key] = 0  # 또는 `continue`로 항목을 무시하도록 설정 가능
+        # ':' 문자가 포함된 줄만 처리
+        if ':' in line:
+            key, value = line.split(':', 1)  # 첫 번째 ':'로만 분리
+            inventory[key.strip()] = int(value.strip()) if value.strip().isdigit() else 0  # 숫자가 아닌 값은 0으로 처리
+        else:
+            # ':'이 없는 경우를 처리 (예: 빈 줄 또는 잘못된 형식)
+            print(f"Warning: Invalid inventory line skipped: '{line}'")  # 로그 출력 (선택 사항)
     return inventory
+
 
 # 선택지 파싱
 def parse_choices(choices_text):
