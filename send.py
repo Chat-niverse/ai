@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
-import json
-from game import get_main_story, parse_gpt_response  # 필요한 함수 임포트
+from game import get_main_story, parse_output_to_json  # 필요한 함수 임포트
 
 app = Flask(__name__)
 
@@ -13,33 +12,27 @@ def process_request():
         data = request.get_json()
         if data is None:
             return jsonify({'status': 'failure', 'message': 'Invalid or missing JSON data in the request'}), 400
-    except json.JSONDecodeError:
-        return jsonify({'status': 'failure', 'message': 'Invalid JSON format in body'}), 400
+    except Exception as e:
+        return jsonify({'status': 'failure', 'message': 'Invalid JSON format in body', 'error': str(e)}), 400
 
     # 주요 게임 데이터 확인
-    username = data.get('username', 'PlayerOne')  # 기본 값 추가
-    worldview = data.get('worldview', 'Fantasy')  # 기본 값 추가
-    charsetting = data.get('charsetting', 'Warrior')  # 기본 값 추가
-    aim = data.get('aim', 'Defeat the Dragon')  # 기본 값 추가
-    playlog = data.get('playlog')
-    selectedchoice = data.get('selectedchoice')
+    username = data.get('username')  # 기본 값 추가
+    worldview = data.get('worldview')  # 기본 값 추가
+    charsetting = data.get('charsetting')  # 기본 값 추가
+    aim = data.get('aim')  # 기본 값 추가
+    playlog = data.get('playlog', '')
+    selectedchoice = data.get('selectedchoice', None)  # 기본 선택 값 추가
 
     # 데이터 검증: 필수 데이터 확인
     required_fields = [username, worldview, charsetting, aim]
     if any(field is None for field in required_fields):
         return jsonify({'status': 'failure', 'message': 'Missing required fields'}), 400
 
-    # 처음 입력: 캐릭터 설정이 있고 나머지가 None인 경우
-    if all(value is None for value in [playlog, selectedchoice]):
-        # main_story 호출
-        story_response = get_main_story(worldview, charsetting, aim, playlog, selectedchoice)
-        # GPT 응답을 JSON 형식으로 변환
-        processed_data = json.loads(parse_gpt_response(story_response))  # 여기서 JSON 파싱
-
-    else:
-        # 이후 입력: 다음 스토리 진행
-        story_response = get_main_story(worldview, charsetting, aim, playlog, selectedchoice)
-        processed_data = json.loads(parse_gpt_response(story_response))  # 여기서도 JSON 파싱
+    # 게임 스토리 진행: 처음 입력이거나 이후 입력에 따라 다르게 처리
+    story_response = get_main_story(worldview, charsetting, aim, playlog, selectedchoice)
+    
+    # GPT 응답을 JSON 형식으로 변환
+    processed_data = parse_output_to_json(story_response)
 
     # 적절한 JSON 형식으로 데이터 가공
     final_data = {
@@ -47,31 +40,26 @@ def process_request():
         "worldview": worldview,
         "charsetting": charsetting,
         "aim": aim,
+        "life": processed_data.get("life", {}),
         "status": {
-            "strength": processed_data.get("status", {}).get("힘", 1),
-            "perception": processed_data.get("status", {}).get("인지력", 1),
-            "endurance": processed_data.get("status", {}).get("지구력", 1),
-            "charisma": processed_data.get("status", {}).get("카리스마", 1),
-            "intelligence": processed_data.get("status", {}).get("지능", 1),
-            "luck": processed_data.get("status", {}).get("운", 1),
-            "life": processed_data.get("status", {}).get("체력", 3)
+            "strength": processed_data.get("status", {}).get("strength", 1),
+            "perception": processed_data.get("status", {}).get("perception", 1),
+            "endurance": processed_data.get("status", {}).get("endurance", 1),
+            "charisma": processed_data.get("status", {}).get("charisma", 1),
+            "intelligence": processed_data.get("status", {}).get("intelligence", 1),
+            "luck": processed_data.get("status", {}).get("luck", 1),
         },
-        "life": processed_data.get("life", 3),
         "inventory": processed_data.get("inventory", {}),
         "playlog": processed_data.get("playlog", ""),
-        "selectedchoice": selectedchoice or "first",  # 기본 선택 값
+        "selectedchoice": selectedchoice,
         "gptsays": processed_data.get("gptsays", ""),
-        "choices": {
-            "first": processed_data.get("choices", {}).get("choice_1", ""),
-            "second": processed_data.get("choices", {}).get("choice_2", ""),
-            "third": processed_data.get("choices", {}).get("choice_3", ""),
-            "fourth": processed_data.get("choices", {}).get("choice_4", "")
-        },
-        "imageurl": processed_data.get("imageurl", "http://example.com/images/dragon.jpg")
+        "choices": processed_data.get("choices", {}),
+        "imageurl": 'test',
+        "count": processed_data.get("count", 0),
     }
 
     # 처리된 데이터만 응답으로 전송
-    return jsonify(final_data), 200  # final_data만 전송
+    return jsonify(final_data), 200
 
 def run_ai_server():
     """AI 서버 실행"""

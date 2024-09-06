@@ -15,7 +15,7 @@ def generate_adventure(prompt):
 },
 {
     "role": "user",
-    "content": f"{prompt}\n\nPlease write the result in Korean. Organize the output into the following sections: [스테이터스], [인벤토리] 아이템 : 숫자, [스토리], [선택지], [선택횟수] 숫자만. Exclude any phrases like 'What will you choose?' or similar prompts for selection."
+    "content": f"{prompt}\n\nPlease write the result in Korean. Organize the output into the following sections: [스테이터스], [인벤토리] 아이템 : 숫자, [스토리], [선택지], [선택횟수] 숫자만, [요약](요약이 없다면 [요약]만 출력하고 아래는 빈칸으로 출력해줘). Exclude any phrases like 'What will you choose?' or similar prompts for selection.Please do not include the '-' character in the output."
 }
 
             ],
