@@ -83,8 +83,8 @@ def parse_output_to_json(output_text):
 
     # 인벤토리 추출
     inventory_match = re.search(r'\[인벤토리\]\n아이템 : (.+)', output_text)
-    inventory_items = inventory_match.group(1).split(', ') if inventory_match else ['없음']
-    inventory = {'items': inventory_items}
+    inventory_items = inventory_match.group(1).split(', ') if inventory_match else ['']
+    inventory = {inventory_items}
 
     # 스토리 추출
     playlog_match = re.search(r'\[스토리\]\n(.+?)\n\n', output_text, re.DOTALL)
