@@ -34,12 +34,12 @@ def process_request():
         # main_story 호출
         story_response = get_main_story(worldview, charsetting, aim, playlog, selectedchoice)
         # GPT 응답을 JSON 형식으로 변환
-        processed_data = parse_gpt_response(story_response)
+        processed_data = json.loads(parse_gpt_response(story_response))  # 여기서 JSON 파싱
 
     else:
         # 이후 입력: 다음 스토리 진행
         story_response = get_main_story(worldview, charsetting, aim, playlog, selectedchoice)
-        processed_data = parse_gpt_response(story_response)
+        processed_data = json.loads(parse_gpt_response(story_response))  # 여기서도 JSON 파싱
 
     # 적절한 JSON 형식으로 데이터 가공
     final_data = {

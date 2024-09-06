@@ -20,6 +20,7 @@ def get_main_story(world, char_traits, aim, playlog, selectchoice, max_tokens=10
     - 9~13: 중립적인 결과.
     - 14~20: 긍정적인 결과 (예: 좋은 아이템 획득, 스테이터스 증가).
     3. 체력은 한 번에 최대 1만 감소할 수 있습니다.
+    4. 스테이터스는 1 미만으로 떨어질 수 없습니다.
 
     캐릭터의 초기 스테이터스:
     - 체력: 3 (게임 오버와 직결, 0이 되면 게임 오버, 최대 체력 3)
@@ -45,7 +46,7 @@ def get_main_story(world, char_traits, aim, playlog, selectchoice, max_tokens=10
     - 사용자의 선택: {selectchoice} (None일 경우 첫 선택입니다).
 
     중요: 다음 사용자 입력이 필요합니다. 추가 입력이 있을 때까지 다음 출력을 생성하지 마세요.
-
+    스텟의 변화나 아이템의 획득을 선택지에 직접적인 수치로 표시하지는 말아줘
     위 내용을 바탕으로 상황을 묘사하고, 선택지를 제공해 주세요.
     """
     
@@ -121,11 +122,25 @@ def parse_gpt_response(response_text):
 
 # 스테이터스 파싱
 def parse_status(status_text):
+
+    # 줄바꿈으로 분할하여 각 라인을 개별적으로 파싱합니다.
     status_lines = status_text.split('\n')
     status = {}
+
+    # 각 라인에서 키와 값을 ':' 기준으로 분리하여 딕셔너리에 추가합니다.
     for line in status_lines:
-        key, value = line.split(':')
-        status[key.strip()] = int(value.strip())
+        # 빈 줄 또는 잘못된 형식의 줄 무시
+        if ':' not in line:
+            continue
+
+        # ':'를 기준으로 키와 값을 나누고, 공백을 제거한 후 정수형으로 변환합니다.
+        key, value = line.split(':', 1)
+        try:
+            status[key.strip()] = int(value.strip())
+        except ValueError:
+            # 값이 숫자가 아닌 경우 예외 처리
+            status[key.strip()] = 0  # 기본값으로 0을 설정하거나 다른 기본값을 설정할 수 있습니다.
+
     return status
 
 # 인벤토리 파싱
