@@ -81,9 +81,31 @@ def parse_output_to_json(output_text):
                     print(f"Failed to parse status value for {key.strip()}: {value.strip()}")
                     status[key.strip()] = 1  # 변환 실패 시 기본값 설정
 
-    inventory_match = re.search(r'\[인벤토리\]\n아이템 : (.+)', output_text)
-    inventory_items = inventory_match.group(1).split(', ') if inventory_match else ['']
-    inventory = inventory_items
+    # 인벤토리 추출
+    inventory_match = re.search(r'\[인벤토리\]\n(.+)', output_text)  # [인벤토리] 섹션 아래 텍스트 추출
+    inventory_text = inventory_match.group(1).strip() if inventory_match else ''
+
+    # 빈 딕셔너리 초기화
+    inventory = {}
+
+    # 인벤토리 내용이 "없음"인 경우를 처리
+    if "없음" in inventory_text:
+        inventory = {}  # 빈 딕셔너리로 유지
+    else:
+        # 아이템들을 쉼표로 분리하여 리스트로 만듦
+        inventory_items = inventory_text.split(', ')
+
+        # 각 아이템을 파싱하여 딕셔너리에 추가
+        for item in inventory_items:
+            if ':' in item:
+                key, value = item.split(':', 1)  # 첫 번째 ':'로만 분리
+                key = key.strip()
+                value = value.strip()
+                try:
+                    inventory[key] = int(value) if value.isdigit() else 0  # 숫자일 때만 변환하고, 아니면 0
+                except ValueError:
+                    print(f"Failed to parse inventory item for {key.strip()}: {value.strip()}")
+                    inventory[key] = 1  # 변환 실패 시 기본값 설정
     
     # 스토리 추출
     playlog_match = re.search(r'\[스토리\]\n(.+?)\n\n', output_text, re.DOTALL)
