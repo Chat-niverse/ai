@@ -63,7 +63,7 @@ def process_request():
 
 def run_ai_server():
     """AI 서버 실행"""
-    app.run(host='0.0.0.0', port=5000)  # AI 서버는 5000 포트에서 실행
+    app.run(host='0.0.0.0', port=5000, debug=True)  # AI 서버는 5000 포트에서 실행
 
 if __name__ == '__main__':
     # AI 서버 실행
