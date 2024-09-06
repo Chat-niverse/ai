@@ -114,7 +114,6 @@ def parse_gpt_response(response_text):
         "selectedchoice": "first",
         "gptsays": "You are on the right path to defeat the dragon!",
         "choices": choices,
-        "count": count,  # 선택 횟수 추가
         "imageurl": "http://example.com/images/dragon.jpg"  # 예시 값
     }
 
