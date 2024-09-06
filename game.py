@@ -94,7 +94,6 @@ def parse_gpt_response(response_text):
     inventory_match = re.search(r'\[인벤토리\](.*?)\[스토리\]', response_text, re.DOTALL)
     story_match = re.search(r'\[스토리\](.*?)\[선택지\]', response_text, re.DOTALL)
     choices_match = re.search(r'\[선택지\](.*?)\[선택횟수\]', response_text, re.DOTALL)
-    count_match = re.search(r'\[선택횟수\](.*)', response_text, re.DOTALL)
 
     # 각 섹션을 텍스트에서 추출하고, 필요 시 변환
     status = parse_status(status_match.group(1).strip()) if status_match else {}
