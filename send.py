@@ -39,28 +39,32 @@ def process_request():
 
     else:
         # 이후 입력: 다음 스토리 진행
-        next_story, choices_list, status_change, inventory_change, life_change, ending = get_main_story(worldview, charsetting, aim, playlog, selectedchoice)
-        # 적절한 JSON 형식으로 데이터 가공
-        processed_data = {
-            'nextstory': next_story,
-            'choices': choices_list,
-            'status': status_change,
-            'inventory': inventory_change,
-            'life': life_change,
-            'gptsays': ending,
-            'playlog': playlog,
-            'selectedchoice': selectedchoice,
-            'worldview': worldview,
-            'charsetting': charsetting,
-            'aim': aim
-        }
+        story_response = get_main_story(worldview, charsetting, aim, playlog, selectedchoice)
+        processed_data = parse_gpt_response(story_response)
+
+    # 적절한 JSON 형식으로 데이터 가공
+    final_data = {
+        "username": username,
+        "worldview": worldview,
+        "charsetting": charsetting,
+        "aim": aim,
+        "status": processed_data.get("status", {}),
+        "life": processed_data.get("life", 3),
+        "inventory": processed_data.get("inventory", {}),
+        "playlog": processed_data.get("playlog", ""),
+        "count": processed_data.get("count", 0),
+        "selectedchoice": selectedchoice,
+        "gptsays": processed_data.get("gptsays", ""),
+        "choices": processed_data.get("choices", {}),
+        "imageurl": processed_data.get("imageurl", "")
+    }
 
     # 백엔드로 결과 전송할 URL
     backend_url = "http://your-backend-server-url/endpoint"  # 실제 백엔드 서버 URL로 교체
 
     try:
         # 백엔드 서버로 결과 전송
-        response = requests.post(backend_url, json=processed_data)
+        response = requests.post(backend_url, json=final_data)
         response.raise_for_status()  # 요청이 성공하지 않으면 예외 발생
         return jsonify({
             'status': 'success',
