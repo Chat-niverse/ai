@@ -43,7 +43,7 @@ def get_main_story(world, char_traits, aim, count, playlog, choices, status, lif
 
     제가 제공하는 정보는 다음과 같습니다:
     1. 세계관: {world}
-    2. 캐릭터: {char_traits}
+    2. 캐릭터 성격: {char_traits}
     3. 목표: {aim}
 
     게임 진행 방식:
